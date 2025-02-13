@@ -1,0 +1,24 @@
+version: '3'
+
+tasks:
+  build-push:
+    requires:
+      vars:
+        - IMAGE_TAG
+        - REGISTRY
+        - REPOSITORY
+        - SRC
+    vars:
+      GIT_TAG:
+        sh: "(command -v git > /dev/null && cd {{.SRC}} && git rev-parse --short HEAD) || echo ''"
+    dir: '{{.SRC}}'
+    cmds:
+    - echo "{{.SRC}}"
+    - docker build --pull  -t "{{.REGISTRY}}/{{.REPOSITORY}}:{{.IMAGE_TAG}}" .
+    - docker push "{{.REGISTRY}}/{{.REPOSITORY}}:{{.IMAGE_TAG}}"
+    - |
+      {{ if .GIT_TAG }}
+        echo "Tagging with git commit hash"
+        docker tag "{{.REGISTRY}}/{{.REPOSITORY}}:{{.IMAGE_TAG}}" "{{.REGISTRY}}/{{.REPOSITORY}}:{{.GIT_TAG}}"
+        docker push "{{.REGISTRY}}/{{.REPOSITORY}}:{{.GIT_TAG}}"
+      {{ end }}

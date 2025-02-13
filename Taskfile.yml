@@ -1,0 +1,35 @@
+version: '3'
+includes:
+  npm: ./tasktemplate/npm.yml
+  docker: ./tasktemplate/docker.yml
+
+tasks:
+
+  build-push-all: # New Added Task
+    cmds:
+    - for:
+      - app1
+      - app2
+      - app3
+      task: docker:build-push
+      vars:
+        IMAGE_TAG: "latest"
+        REGISTRY: "localhost:5000"
+        REPOSITORY: "{{ .ITEM }}"
+        SRC: "{{ .ITEM }}"
+
+  ui:build:
+    cmds:
+    - task: npm:build
+      vars:
+        SRC: 'app1'
+  
+  ui:build-push:
+    cmds:
+    - task: docker:build-push
+      vars:
+        IMAGE_TAG: "development"
+        REGISTRY: "localhost:5000"
+        REPOSITORY: "app1"
+        SRC: "app1"
+

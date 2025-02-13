@@ -1,0 +1,31 @@
+version: '3'
+
+env:
+  SRC: '.'
+tasks:
+  install:
+    internal: true
+    dir: '{{.SRC}}'
+    cmds:
+      - echo {{.SRC}}
+      - npm install
+
+  lint:
+    internal: true
+    dir: '{{.SRC}}'
+    ignore_error: true
+    cmds:
+      - npm run lint
+    deps:
+    - task: install
+      vars: { SRC: '{{.SRC}}' }
+  
+  build:
+    internal: true
+    dir: '{{.SRC}}'
+    cmds:
+      - npm run build
+      - defer: rm -rf .cache # added line
+    deps:
+      - task: lint
+        vars: { SRC: '{{.SRC}}' }
